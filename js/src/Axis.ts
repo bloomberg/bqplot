@@ -13,11 +13,19 @@
  * limitations under the License.
  */
 
-import { WidgetView } from '@jupyter-widgets/base';
-import * as d3 from 'd3';
-// const d3 =Object.assign({}, require("d3-axis"), require("d3-format"), require("d3-selection"), require("d3-selection-multi"), require("d3-time"), require("d3-time-format"));
-import * as utils from './utils';
 import * as _ from 'underscore';
+
+import * as d3 from 'd3';
+
+import {
+    WidgetView
+} from '@jupyter-widgets/base';
+
+import {
+    Scale, ScaleModel
+} from 'bqscales';
+
+import * as utils from './utils';
 import { applyAttrs, applyStyles } from './utils';
 
 // Polyfill for Math.log10 in IE11
@@ -155,7 +163,7 @@ export class Axis extends WidgetView {
         }
         if(this.model.get("tick_format") === null ||
             this.model.get("tick_format") === undefined) {
-                if(this.axis_scale.type !== "ordinal") {
+                if(this.axis_scale.model.type !== "ordinal") {
                     this.tick_format = this.guess_tick_format(this.axis.tickValues());
                 }
         }
@@ -216,7 +224,7 @@ export class Axis extends WidgetView {
         const target_range = (is_vertical) ?
             this.parent.range("y") : this.parent.range("x");
 
-        this.axis_scale.expand_domain(initial_range, target_range);
+        this.axis_scale.expandDomain(initial_range, target_range);
         this.axis.scale(this.axis_scale.scale);
     }
 
@@ -234,7 +242,7 @@ export class Axis extends WidgetView {
                 this.parent.range("y") :
                 this.parent.range("x");
 
-            this.offset_scale.expand_domain(initial_range, target_range);
+            this.offset_scale.expandDomain(initial_range, target_range);
         }
     }
 
@@ -271,10 +279,10 @@ export class Axis extends WidgetView {
     set_scales_range() {
         const is_vertical = this.model.get("orientation") === "vertical";
 
-        this.axis_scale.set_range((is_vertical) ?
+        this.axis_scale.setRange((is_vertical) ?
             [this.height, 0] : [0, this.width]);
         if(this.offset_scale) {
-            this.offset_scale.set_range((is_vertical) ?
+            this.offset_scale.setRange((is_vertical) ?
                 [0, this.width] : [this.height, 0]);
         }
     }
@@ -625,7 +633,7 @@ export class Axis extends WidgetView {
             this.parent.padded_range("y", this.axis_scale.model) : this.parent.padded_range("x", this.axis_scale.model);
         const target_range = (this.vertical) ?
             this.parent.range("y") : this.parent.range("x");
-        this.axis_scale.expand_domain(initial_range, target_range);
+        this.axis_scale.expandDomain(initial_range, target_range);
         this.axis.scale(this.axis_scale.scale);
     }
 
@@ -685,10 +693,11 @@ export class Axis extends WidgetView {
         }
     }
 
-    set_scale_promise(model) {
+    set_scale_promise(model: ScaleModel) {
         // Sets the child scale
         if (this.axis_scale) { this.axis_scale.remove(); }
-        return this.create_child_view(model).then((view) => {
+        // @ts-ignore
+        return this.create_child_view(model).then((view: Scale) => {
             // Trigger the displayed event of the child view.
             this.displayed.then(() => {
                 view.trigger("displayed");
@@ -907,7 +916,7 @@ export class Axis extends WidgetView {
         return this.parent.margin;
     }
 
-    axis_scale: any;
+    axis_scale: Scale;
     axis: any;
     d3el: any;
     g_axisline: any;

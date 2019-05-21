@@ -274,8 +274,8 @@ export class BrushSelector extends BrushMixinXYSelector {
             const extent_y = pixel_extent_y.map(this.y_scale.invert.bind(this.y_scale)).sort(sort);
 
             this.update_mark_selected(pixel_extent_x, pixel_extent_y);
-            this.set_selected("selected_x", this.x_scale.model.typedRange((extent_x as ArrayLike<number>)));
-            this.set_selected("selected_y", this.y_scale.model.typedRange((extent_y as ArrayLike<number>)));
+            this.set_selected("selected_x", this.x_scale.model.typedRange(extent_x));
+            this.set_selected("selected_y", this.y_scale.model.typedRange(extent_y));
             this.touch();
         }
     }

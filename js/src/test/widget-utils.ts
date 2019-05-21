@@ -6,16 +6,21 @@ async function create_model_bqplot(manager, name: string, id: string, args: Obje
 }
 
 export
-async function create_model(manager, module: string, model: string, view: string, id: string, args = {}) {
+async function create_model_bqscales(manager, name: string, id: string, args: Object) {
+    return create_model(manager, 'bqscales', `${name}Model`, name, id, args);
+}
+
+export
+async function create_model(manager, module_name: string, model: string, view: string, id: string, args = {}) {
     let model_widget = await manager.new_widget({
-            model_module: module,
+            model_module: module_name,
             model_name: model,
             model_module_version : '*',
-            view_module: module,
+            view_module: module_name,
             view_name: view,
             view_module_version: '*',
             model_id: id,
-    }, args );
+    }, args);
     return model_widget;
 
 }
@@ -40,14 +45,14 @@ async function create_figure_scatter(manager, x, y, mega=false, log=false) {
     let scale_x;
     let scale_y;
     if (log) {
-        scale_x = await create_model_bqplot(manager, 'LogScale', 'scale_x', {min:0.01, max:100, allow_padding: false})
-        scale_y = await create_model_bqplot(manager, 'LogScale', 'scale_y',  {min:0.1, max:10, allow_padding: false})
+        scale_x = await create_model_bqscales(manager, 'LogScale', 'scale_x', {min:0.01, max:100, allow_padding: false})
+        scale_y = await create_model_bqscales(manager, 'LogScale', 'scale_y',  {min:0.1, max:10, allow_padding: false})
     } else {
-        scale_x = await create_model_bqplot(manager, 'LinearScale', 'scale_x', {min:0, max:1, allow_padding: false})
-        scale_y = await create_model_bqplot(manager, 'LinearScale', 'scale_y', {min:2, max:3, allow_padding: false})
+        scale_x = await create_model_bqscales(manager, 'LinearScale', 'scale_x', {min:0, max:1, allow_padding: false})
+        scale_y = await create_model_bqscales(manager, 'LinearScale', 'scale_y', {min:2, max:3, allow_padding: false})
     }
     // TODO: the default values for the ColorScale should not be required, but defined in the defaults method
-    let scale_color = await create_model_bqplot(manager, 'ColorScale', 'scale_color', {scheme: 'RdYlGn', colors: []})
+    let scale_color = await create_model_bqscales(manager, 'ColorScale', 'scale_color', {scheme: 'RdYlGn', colors: []})
     let scales = {x: scale_x.toJSON(), y: scale_y.toJSON(), color: scale_color.toJSON()}
     let color    = null;
     let size     = null;
@@ -78,8 +83,8 @@ async function create_figure_scatter(manager, x, y, mega=false, log=false) {
 export
 async function create_figure_lines(manager, x, y, default_scales={}) {
     let layout = await create_model(manager, '@jupyter-widgets/base', 'LayoutModel', 'LayoutView', 'layout_figure1', {_dom_classes: '', width: '400px', height: '500px'})
-    let scale_x = await create_model_bqplot(manager, 'LinearScale', 'scale_x', {min:0, max:1, allow_padding: false})
-    let scale_y = await create_model_bqplot(manager, 'LinearScale', 'scale_y', {min:2, max:3, allow_padding: false})
+    let scale_x = await create_model_bqscales(manager, 'LinearScale', 'scale_x', {min:0, max:1, allow_padding: false})
+    let scale_y = await create_model_bqscales(manager, 'LinearScale', 'scale_y', {min:2, max:3, allow_padding: false})
     let scales = {x: scale_x.toJSON(), y: scale_y.toJSON()}
     let scales_mark = {x: default_scales['x'] || scale_x.toJSON(), y: default_scales['y'] || scale_y.toJSON()}
     let color    = null;
@@ -111,8 +116,8 @@ export
 async function create_figure_pie(manager, sizes, labels) {
     let layout = await create_model(manager, '@jupyter-widgets/base', 'LayoutModel', 'LayoutView', 'layout_figure1', {_dom_classes: '', width: '400px', height: '500px'})
 
-    let scale_x = await create_model_bqplot(manager, 'LinearScale', 'scale_x', {allow_padding: false})
-    let scale_y = await create_model_bqplot(manager, 'LinearScale', 'scale_y', {allow_padding: false})
+    let scale_x = await create_model_bqscales(manager, 'LinearScale', 'scale_x', {allow_padding: false})
+    let scale_y = await create_model_bqscales(manager, 'LinearScale', 'scale_y', {allow_padding: false})
 
     let pieModel = await create_model_bqplot(manager, 'Pie', 'pie1', {
         sizes: sizes, labels: labels,
@@ -136,8 +141,8 @@ async function create_figure_pie(manager, sizes, labels) {
 export
 async function create_figure_bars(manager, x, y) {
     let layout = await create_model(manager, '@jupyter-widgets/base', 'LayoutModel', 'LayoutView', 'layout_figure1', {_dom_classes: '', width: '400px', height: '500px'})
-    let scale_x = await create_model_bqplot(manager, 'LinearScale', 'scale_x', {min:0, max:1, allow_padding: false})
-    let scale_y = await create_model_bqplot(manager, 'LinearScale', 'scale_y', {min:0, max:3, allow_padding: false})
+    let scale_x = await create_model_bqscales(manager, 'LinearScale', 'scale_x', {min:0, max:1, allow_padding: false})
+    let scale_y = await create_model_bqscales(manager, 'LinearScale', 'scale_y', {min:0, max:3, allow_padding: false})
     let scales = {x: scale_x.toJSON(), y: scale_y.toJSON()}
     let color    = null;
     let size     = null;
@@ -167,8 +172,8 @@ async function create_figure_bars(manager, x, y) {
 export
 async function create_figure_hist(manager, sample, bins) {
     let layout = await create_model(manager, '@jupyter-widgets/base', 'LayoutModel', 'LayoutView', 'layout_figure1', {_dom_classes: '', width: '400px', height: '500px'})
-    let scale_sample = await create_model_bqplot(manager, 'LinearScale', 'scale_sample', {allow_padding: false})
-    let scale_count = await create_model_bqplot(manager, 'LinearScale', 'scale_count', {allow_padding: false})
+    let scale_sample = await create_model_bqscales(manager, 'LinearScale', 'scale_sample', {allow_padding: false})
+    let scale_count = await create_model_bqscales(manager, 'LinearScale', 'scale_count', {allow_padding: false})
     let scales = {sample: scale_sample.toJSON(), count: scale_count.toJSON()}
 
     let histModel = await create_model_bqplot(manager, 'Hist', 'hist1', {scales: scales,
@@ -193,11 +198,11 @@ async function create_figure_hist(manager, sample, bins) {
 export
 async function create_figure_gridheatmap(manager, color) {
     let layout = await create_model(manager, '@jupyter-widgets/base', 'LayoutModel', 'LayoutView', 'layout_figure1', {_dom_classes: '', width: '400px', height: '500px'});
-    let scale_x = await create_model_bqplot(manager, 'LinearScale', 'scale_x', {min:0, max:1, allow_padding: false});
-    let scale_y = await create_model_bqplot(manager, 'LinearScale', 'scale_y', {min:0, max:1, allow_padding: false});
-    let scale_row = await create_model_bqplot(manager, 'OrdinalScale', 'scale_row', {reverse: true});
-    let scale_column = await create_model_bqplot(manager, 'OrdinalScale', 'scale_column', {});
-    let scale_color = await create_model_bqplot(manager, 'ColorScale', 'scale_color', {scheme: 'RdYlGn', colors: []});
+    let scale_x = await create_model_bqscales(manager, 'LinearScale', 'scale_x', {min:0, max:1, allow_padding: false});
+    let scale_y = await create_model_bqscales(manager, 'LinearScale', 'scale_y', {min:0, max:1, allow_padding: false});
+    let scale_row = await create_model_bqscales(manager, 'OrdinalScale', 'scale_row', {reverse: true});
+    let scale_column = await create_model_bqscales(manager, 'OrdinalScale', 'scale_column', {});
+    let scale_color = await create_model_bqscales(manager, 'ColorScale', 'scale_color', {scheme: 'RdYlGn', colors: []});
     let scales = {color: scale_color.toJSON(), row: scale_row.toJSON(), column: scale_column.toJSON()};
 
     let gridModel = await create_model_bqplot(manager, 'GridHeatMap', 'gridheatmap1', {scales: scales,
@@ -224,8 +229,8 @@ export
 async function create_figure_image(manager, ipywidgetImage) {
     let layout = await create_model(manager, '@jupyter-widgets/base', 'LayoutModel', 'LayoutView', 'layout_figure1', {_dom_classes: '', width: '400px', height: '500px'})
 
-    let scale_x = await create_model_bqplot(manager, 'LinearScale', 'scale_x', {allow_padding: false})
-    let scale_y = await create_model_bqplot(manager, 'LinearScale', 'scale_y', {allow_padding: false})
+    let scale_x = await create_model_bqscales(manager, 'LinearScale', 'scale_x', {allow_padding: false})
+    let scale_y = await create_model_bqscales(manager, 'LinearScale', 'scale_y', {allow_padding: false})
 
     let scales = {x: scale_x.toJSON(), y: scale_y.toJSON()}
     let imageModel = await create_model_bqplot(manager, 'Image', 'image1', {

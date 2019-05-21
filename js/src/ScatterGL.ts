@@ -20,6 +20,10 @@ import { deepCopy } from './utils';
 import { ScatterGLModel } from './ScatterGLModel';
 import * as THREE from 'three';
 
+import {
+    ColorScale, ColorScaleModel
+} from 'bqscales';
+
 type TypedArray = Int8Array | Uint8Array | Int16Array | Uint16Array | Int32Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array;
 
 const bqSymbol = markers.symbol;
@@ -47,9 +51,9 @@ const color_to_array_rgba = function(color, default_color?) {
     }
 }
 
-const create_colormap = function(scale) {
+const create_colormap = function(scale: ColorScale) {
     // convert the d3 color scale to a texture
-    const colors = scale ? scale.model.color_range : ['#ff0000', '#ff0000'];
+    const colors = scale ? scale.model.colorRange : [0, 1];
     const color_scale = d3.scaleLinear()
                               .range(colors)
                               .domain(_.range(colors.length).map((i) => i / (colors.length - 1)));
@@ -745,31 +749,32 @@ export class ScatterGL extends Mark {
     }
 
     update_color_map() {
-        this.scatter_material.uniforms['colormap'].value = create_colormap(this.scales.color)
+        this.scatter_material.uniforms['colormap'].value = create_colormap(this.scales.color as ColorScale)
 
         if(this.scales.color) {
             const color = this.model.get('color');
+            // @ts-ignore
+            const colorScaleModel: ColorScaleModel = this.scales.color.model;
             if(color) {
                 let min;
                 let max;
-                if(this.scales.color.model.min !== null) {
-                    min = this.scales.color.model.min;
+                if(colorScaleModel.min !== null) {
+                    min = colorScaleModel.min;
                 } else {
                     min = Math.min(...color);
                 }
-                if(this.scales.color.model.max !== null) {
-                    max = this.scales.color.model.max;
+                if(colorScaleModel.max !== null) {
+                    max = colorScaleModel.max;
                 } else {
                     max = Math.max(...color);
                 }
                 this.scatter_material.uniforms['domain_color'].value = [min, max];
             } else {
-                if(this.scales.color.model.min !== null && this.scales.color.model.max !== null) {
-                    this.scatter_material.uniforms['domain_color'].value = [this.scales.color.model.min, this.scales.color.model.max];
+                if(colorScaleModel.min !== null && colorScaleModel.max !== null) {
+                    this.scatter_material.uniforms['domain_color'].value = [colorScaleModel.min, colorScaleModel.max];
                 } else {
                     console.warn('no color set, and color scale does not have a min or max')
                 }
-
             }
         }
 
@@ -899,22 +904,22 @@ export class ScatterGL extends Mark {
             skew_scale = this.scales.skew,
             rotation_scale = this.scales.rotation;
         if(x_scale) {
-            x_scale.set_range(this.parent.padded_range("x", x_scale.model));
+            x_scale.setRange(this.parent.padded_range("x", x_scale.model));
         }
         if(y_scale) {
-            y_scale.set_range(this.parent.padded_range("y", y_scale.model));
+            y_scale.setRange(this.parent.padded_range("y", y_scale.model));
         }
         if(size_scale) {
-            size_scale.set_range([0, this.model.get("default_size")]);
+            size_scale.setRange([0, this.model.get("default_size")]);
         }
         if(opacity_scale) {
-            opacity_scale.set_range([0.2, 1]);
+            opacity_scale.setRange([0.2, 1]);
         }
         if(skew_scale) {
-            skew_scale.set_range([0, 1]);
+            skew_scale.setRange([0, 1]);
         }
         if(rotation_scale) {
-            rotation_scale.set_range([0, Math.PI]); // TODO: this mirrors the 180 from the normal scatter, but why not 360?
+            rotation_scale.setRange([0, Math.PI]); // TODO: this mirrors the 180 from the normal scatter, but why not 360?
         }
     }
 

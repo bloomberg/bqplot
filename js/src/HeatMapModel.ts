@@ -62,27 +62,27 @@ export class HeatMapModel extends MarkModel {
     update_domains() {
         if (!this.mark_data) { return; }
 
-        const scales = this.get("scales");
+        const scales = this.getScales();
         const x_scale = scales.x, y_scale = scales.y;
         const color_scale = scales.color;
         const flat_colors = [].concat.apply([], this.mark_data.color.map((x) => Array.prototype.slice.call(x, 0)));
 
         if(!this.get("preserve_domain").x) {
-            x_scale.compute_and_set_domain(this.mark_data.x, this.model_id + "_x");
+            x_scale.computeAndSetDomain(this.mark_data.x, this.model_id + "_x");
         } else {
-            x_scale.del_domain([], this.model_id + "_x");
+            x_scale.delDomain([], this.model_id + "_x");
         }
 
         if(!this.get("preserve_domain").y) {
-            y_scale.compute_and_set_domain(this.mark_data.y, this.model_id + "_y");
+            y_scale.computeAndSetDomain(this.mark_data.y, this.model_id + "_y");
         } else {
-            y_scale.del_domain([], this.model_id + "_y");
+            y_scale.delDomain([], this.model_id + "_y");
         }
         if(color_scale !== null && color_scale !== undefined) {
             if(!this.get("preserve_domain").color) {
-                color_scale.compute_and_set_domain(flat_colors, this.model_id + "_color");
+                color_scale.computeAndSetDomain(flat_colors, this.model_id + "_color");
             } else {
-                color_scale.del_domain([], this.model_id + "_color");
+                color_scale.delDomain([], this.model_id + "_color");
             }
         }
     }

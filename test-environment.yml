@@ -18,3 +18,4 @@ dependencies:
     - selenium  # test dependency
     - flake8
     - nose
+    - bqscales

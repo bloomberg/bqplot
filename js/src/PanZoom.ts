@@ -20,7 +20,20 @@ const d3GetEvent = function(){return require("d3-selection").event}.bind(this);
 import * as interaction from './Interaction';
 import * as _ from 'underscore';
 
+import {
+    Dict
+} from '@jupyter-widgets/base';
 
+import {
+    Scale, ScaleModel
+} from 'bqscales'
+
+import {
+    PanZoomModel
+} from './PanZoomModel';
+
+
+// TODO avoid code duplication for 'x' and 'y'
 export class PanZoom extends interaction.Interaction {
 
     render() {
@@ -45,33 +58,30 @@ export class PanZoom extends interaction.Interaction {
     }
 
     update_scales() {
-        const scales = this.model.get("scales");
-        const that = this;
+        const scales = this.model.getScales();
         this.scale_promises = widgets.resolvePromisesDict({
-            "x": Promise.all((scales.x || []).map(function(model : widgets.WidgetModel) {
-                    return that.create_child_view(model);
+            "x": Promise.all((scales.x || []).map((model: ScaleModel) => {
+                    // @ts-ignore
+                    return this.create_child_view(model) as Scale;
                  })),
-            "y": Promise.all((scales.y || []).map(function(model : widgets.WidgetModel) {
-                    return that.create_child_view(model);
+            "y": Promise.all((scales.y || []).map((model: ScaleModel) => {
+                    // @ts-ignore
+                    return this.create_child_view(model) as Scale;
                  })),
         });
-        widgets.resolvePromisesDict(this.scale_promises)
-            .then(_.bind(this.set_ranges, this));
+        this.scale_promises.then(this.set_ranges.bind(this));
     }
 
     set_ranges() {
-       const that = this;
        let i;
-       this.scale_promises.then(function(scale_views) {
+       this.scale_promises.then((scale_views) => {
            const xscale_views = scale_views.x;
            for (i=0; i<xscale_views.length; i++) {
-               xscale_views[i].set_range(that.parent.padded_range("x",
-                                                xscale_views[i].model));
+               xscale_views[i].setRange(this.parent.padded_range("x", xscale_views[i].model));
            }
            const yscale_views = scale_views.y;
            for (i=0; i<yscale_views.length; i++) {
-               yscale_views[i].set_range(that.parent.padded_range("y",
-                                                yscale_views[i].model));
+               yscale_views[i].setRange(this.parent.padded_range("y", yscale_views[i].model));
            }
        });
     }
@@ -81,7 +91,7 @@ export class PanZoom extends interaction.Interaction {
     }
 
     _mousedown(mouse_pos) {
-        const scales = this.model.get("scales");
+        const scales = this.model.getScales();
         this.active = true;
         this.d3el.style("cursor", "move");
         this.previous_pos = mouse_pos.slice();
@@ -89,10 +99,10 @@ export class PanZoom extends interaction.Interaction {
         // drift when Paning.
         this.domains_in_order = {
             "x": (scales.x || []).map(function(s) {
-                return s.get_domain_slice_in_order();
+                return s.getDomainSliceInOrder();
             }),
             "y": (scales.y || []).map(function(s) {
-                return s.get_domain_slice_in_order();
+                return s.getDomainSliceInOrder();
             }),
         };
     }
@@ -113,6 +123,7 @@ export class PanZoom extends interaction.Interaction {
             if (this.previous_pos === undefined) {
                 this.previous_pos = mouse_pos;
             }
+
             const mouse_delta = {
                 x: mouse_pos[0] - this.previous_pos[0],
                 y: mouse_pos[1] - this.previous_pos[1],
@@ -163,7 +174,7 @@ export class PanZoom extends interaction.Interaction {
                         if (view.scale.invert) { // Categorical scales don't have an inversion.
                             const scale = view.scale;//.copy().domain(this.domains_in_order[dimension][index]);
                             // convert the initial domain to pixel coordinates
-                            let [domain_min, domain_max] = view.model.get_domain_slice_in_order();
+                            let [domain_min, domain_max] = view.model.getDomainSliceInOrder();
                             const pixel_min = scale(domain_min);
                             const pixel_max = scale(domain_max);
                             // take a weighted average between the mouse pos and the original pixel coordinate
@@ -181,8 +192,8 @@ export class PanZoom extends interaction.Interaction {
     }
 
     active: boolean;
-    scale_promises: any;
+    scale_promises: Promise<Dict<Scale[]>>;
     previous_pos: any;
     domains_in_order: any;
+    model: PanZoomModel;
 }
-

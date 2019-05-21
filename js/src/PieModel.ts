@@ -102,12 +102,12 @@ export class PieModel extends MarkModel {
             return;
         }
         const color = this.get("color");
-        const color_scale = this.get("scales").color;
+        const color_scale = this.getScales().color;
         if(color_scale) {
             if(!this.get("preserve_domain").color) {
-                color_scale.compute_and_set_domain(color, this.model_id + "_color");
+                color_scale.computeAndSetDomain(color, this.model_id + "_color");
             } else {
-                color_scale.del_domain([], this.model_id + "_color");
+                color_scale.delDomain([], this.model_id + "_color");
             }
         }
     }
@@ -116,7 +116,7 @@ export class PieModel extends MarkModel {
         if(!this.mark_data) {
             return;
         }
-        const scales = this.get("scales");
+        const scales = this.getScales();
         const x_scale = scales.x;
         const y_scale = scales.y;
 
@@ -124,16 +124,16 @@ export class PieModel extends MarkModel {
             const x = (x_scale.type === "date") ?
                 getDate(this.get("x")) : this.get("x");
             if(!this.get("preserve_domain").x) {
-                x_scale.compute_and_set_domain([x], this.model_id + "_x");
+                x_scale.computeAndSetDomain([x], this.model_id + "_x");
             } else {
-                x_scale.del_domain([], this.model_id + "_x");
+                x_scale.delDomain([], this.model_id + "_x");
             }
         }
         if(y_scale) {
             if(!this.get("preserve_domain").y) {
-                y_scale.compute_and_set_domain([this.get("y")], this.model_id + "_y");
+                y_scale.computeAndSetDomain([this.get("y")], this.model_id + "_y");
             } else {
-                y_scale.del_domain([], this.model_id + "_y");
+                y_scale.delDomain([], this.model_id + "_y");
             }
         }
     }

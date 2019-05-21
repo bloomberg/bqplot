@@ -53,8 +53,8 @@ from IPython.display import display
 from ipywidgets import VBox
 from ipywidgets import Image as ipyImage
 from numpy import arange, issubdtype, array, column_stack, shape
+from bqscales import Scale, LinearScale, Mercator
 from .figure import Figure
-from .scales import Scale, LinearScale, Mercator
 from .axes import Axis
 from .marks import (Lines, Scatter, ScatterGL, Hist, Bars, OHLC, Pie, Map, Image,
                     Label, HeatMap, GridHeatMap, topo_load, Boxplot, Bins)

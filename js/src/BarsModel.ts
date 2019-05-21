@@ -159,7 +159,7 @@ export class BarsModel extends markmodel.MarkModel {
             return;
         }
         const color = this.get("color") || [];
-        const color_scale = this.get("scales").color;
+        const color_scale = this.getScales().color;
         const color_mode = this.get("color_mode");
         const apply_color_to_groups = ((color_mode === "group") ||
                                      (color_mode === "auto" && !(this.is_y_2d)));
@@ -175,27 +175,27 @@ export class BarsModel extends markmodel.MarkModel {
         let element_idx = 0;
         this.mark_data.forEach(function(single_bar_d, bar_grp_index) {
             single_bar_d.values.forEach(function(bar_d, bar_index) {
-                bar_d.color_index = apply_color_to_groups 
-                    ? bar_grp_index 
-                    : apply_color_to_group_element 
-                        ? bar_index 
+                bar_d.color_index = apply_color_to_groups
+                    ? bar_grp_index
+                    : apply_color_to_group_element
+                        ? bar_index
                         : element_idx;
-                bar_d.opacity_index = apply_opacity_to_groups 
-                    ? bar_grp_index 
-                    : apply_opacity_to_group_element 
-                        ? bar_index 
+                bar_d.opacity_index = apply_opacity_to_groups
+                    ? bar_grp_index
+                    : apply_opacity_to_group_element
+                        ? bar_index
                         : element_idx;
                 bar_d.color = color[bar_d.color_index];
-                
+
                 element_idx++;
             });
         });
 
         if(color_scale && color.length > 0) {
             if(!this.get("preserve_domain").color) {
-                color_scale.compute_and_set_domain(color, this.model_id + "_color");
+                color_scale.computeAndSetDomain(color, this.model_id + "_color");
             } else {
-                color_scale.del_domain([], this.model_id + "_color");
+                color_scale.delDomain([], this.model_id + "_color");
             }
         }
     }
@@ -204,22 +204,22 @@ export class BarsModel extends markmodel.MarkModel {
         if(!this.mark_data) {
             return;
         }
-        const scales = this.get("scales");
+        const scales = this.getScales();
         const dom_scale = scales.x;
         const range_scale = scales.y;
 
         if(!this.get("preserve_domain").x) {
-            dom_scale.compute_and_set_domain(this.mark_data.map(function(elem) {
+            dom_scale.computeAndSetDomain(this.mark_data.map(function(elem) {
                 return elem.key;
             }), this.model_id + "_x");
         }
         else {
-            dom_scale.del_domain([], this.model_id + "_x");
+            dom_scale.delDomain([], this.model_id + "_x");
         }
 
         if(!this.get("preserve_domain").y) {
             if(this.get("type") === "stacked") {
-                range_scale.compute_and_set_domain([d3.min(this.mark_data, function(c: any) { return c.neg_max; }),
+                range_scale.computeAndSetDomain([d3.min(this.mark_data, function(c: any) { return c.neg_max; }),
                                                 d3.max(this.mark_data, function(c: any) { return c.pos_max; }), this.base_value],
                                                 this.model_id + "_y");
             } else {
@@ -234,10 +234,10 @@ export class BarsModel extends markmodel.MarkModel {
                         return val.y_ref;
                     });
                 });
-                range_scale.compute_and_set_domain([min, max, this.base_value], this.model_id + "_y");
+                range_scale.computeAndSetDomain([min, max, this.base_value], this.model_id + "_y");
             }
         } else {
-            range_scale.del_domain([], this.model_id + "_y");
+            range_scale.delDomain([], this.model_id + "_y");
         }
     }
 

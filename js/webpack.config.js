@@ -39,7 +39,7 @@ module.exports = [
             rules: rules
         },
         externals: ['@jupyter-widgets/base'],
-        mode: 'production'
+        mode: 'production',
     },
     {// bqplot bundle for unpkg.
         entry: './lib/index-embed.js',

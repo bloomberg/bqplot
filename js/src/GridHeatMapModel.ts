@@ -90,28 +90,28 @@ export class GridHeatMapModel extends MarkModel {
         if(!this.mark_data) {
             return;
         }
-        const scales = this.get("scales");
+        const scales = this.getScales();
         const y_scale = scales.row, x_scale = scales.column;
         const color_scale = scales.color;
 
         if(!this.get("preserve_domain").row) {
-            y_scale.compute_and_set_domain(this.rows, this.model_id + "_row");
+            y_scale.computeAndSetDomain(this.rows, this.model_id + "_row");
         } else {
-            y_scale.del_domain([], this.model_id + "_row");
+            y_scale.delDomain([], this.model_id + "_row");
         }
 
         if(!this.get("preserve_domain").column) {
-            x_scale.compute_and_set_domain(this.columns, this.model_id + "_column");
+            x_scale.computeAndSetDomain(this.columns, this.model_id + "_column");
         } else {
-            x_scale.del_domain([], this.model_id + "_column");
+            x_scale.delDomain([], this.model_id + "_column");
         }
         if(color_scale !== null && color_scale !== undefined) {
             if(!this.get("preserve_domain").color) {
-                color_scale.compute_and_set_domain(this.mark_data.map(function(elem) {
+                color_scale.computeAndSetDomain(this.mark_data.map(function(elem) {
                     return elem.color;
                 }), this.model_id + "_color");
             } else {
-                color_scale.del_domain([], this.model_id + "_color");
+                color_scale.delDomain([], this.model_id + "_color");
             }
         }
     }
@@ -124,7 +124,7 @@ export class GridHeatMapModel extends MarkModel {
         //based on the data, identify the mode in which the heatmap should
         //be plotted.
         const modes : any = {};
-        const scales = this.get("scales");
+        const scales = this.getScales();
         const row_scale = scales.row;
         const column_scale = scales.column;
         const data_nrow = this.colors.length;

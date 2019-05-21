@@ -113,11 +113,13 @@ setup_args = dict(
     include_package_data=True,
     cmdclass=cmdclass,
     install_requires=[
-        'ipywidgets>=7.5.0',
+        'ipywidgets>=7.5.0,<8',
         'traitlets>=4.3.0',
         'traittypes>=0.0.6',
         'numpy>=1.10.4',
-        'pandas'],
+        'pandas',
+        'bqscales>=0.1.1,<0.2'
+    ],
     packages=find_packages(exclude=["tests"]),
     zip_safe=False,
     keywords=[

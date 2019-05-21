@@ -13,8 +13,17 @@
  * limitations under the License.
  */
 
-import * as widgets from '@jupyter-widgets/base';
 import * as d3 from 'd3';
+
+import * as widgets from '@jupyter-widgets/base';
+import {
+    Dict
+} from '@jupyter-widgets/base';
+
+import {
+    ScaleModel
+} from 'bqscales';
+
 import * as serialize from './serialize';
 import { semver_range } from './version';
 
@@ -70,6 +79,11 @@ export class MarketMapModel extends widgets.WidgetModel {
             tooltip_widget: null
         };
     }
+
+    getScales() : Dict<ScaleModel> {
+        return this.get('scales');
+    }
+
     static serializers = {...widgets.WidgetModel.serializers,
         scales: { deserialize: widgets.unpack_models },
         axes: { deserialize: widgets.unpack_models },

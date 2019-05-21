@@ -14,6 +14,14 @@
  */
 
 import * as widgets from '@jupyter-widgets/base';
+import {
+    Dict
+} from '@jupyter-widgets/base';
+
+import {
+    ScaleModel
+} from 'bqscales';
+
 import { semver_range } from './version';
 import * as _ from 'underscore';
 
@@ -41,25 +49,27 @@ class PanZoomModel extends widgets.WidgetModel {
     }
 
     reset_scales() {
-        widgets.resolvePromisesDict(this.get("scales")).then((scales: any) => {
-            _.each(Object.keys(scales), (k) => {
-                _.each(scales[k], (s: any, i) => {
-                    s.set_state(this.scales_states[k][i]);
-                }, this);
+        const scales = this.getScales();
+        _.each(Object.keys(scales), (k) => {
+            _.each(scales[k], (s: any, i) => {
+                s.set_state(this.scales_states[k][i]);
             }, this);
-        });
+        }, this);
     }
 
     snapshot_scales() {
         // Save the state of the scales.
-        widgets.resolvePromisesDict(this.get("scales")).then((scales: any) => {
-            this.scales_states = Object.keys(scales).reduce((obj, key) => {
-                obj[key] = scales[key].map((s) => {
-                    return s.get_state()
-                });
-                return obj;
-            }, {});
-        });
+        const scales = this.getScales();
+        this.scales_states = Object.keys(scales).reduce((obj, key) => {
+            obj[key] = scales[key].map((s) => {
+                return s.get_state(false)
+            });
+            return obj;
+        }, {});
+    }
+
+    getScales() : Dict<ScaleModel[]> {
+        return this.get('scales');
     }
 
     static serializers = {

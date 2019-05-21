@@ -61,10 +61,10 @@ into visual properties (typically a number of pixels, a color, etc.).  ::
 
 """
 
+from bqscales.scales import *  # noqa
 from .figure import *  # noqa
 from .axes import *  # noqa
 from .marks import *  # noqa
-from .scales import *  # noqa
 from .toolbar import *  # noqa
 from .default_tooltip import *  # noqa
 from ._version import version_info, __version__  # noqa
