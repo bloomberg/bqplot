@@ -22,6 +22,9 @@ import * as popperreference from './PopperReference';
 import popper from 'popper.js';
 import * as THREE from 'three';
 import { WidgetView } from '@jupyter-widgets/base';
+import * as kiwi from 'kiwi.js';
+import {Axis} from './Axis';
+
 
 THREE.ShaderChunk['scales'] = require('raw-loader!../shaders/scales.glsl').default;
 
@@ -62,23 +65,72 @@ class Figure extends widgets.DOMWidgetView {
         super.initialize.apply(this, arguments);
     }
 
-    protected getFigureSize (): IFigureSize {
-        const figureSize: IFigureSize = this.el.getBoundingClientRect();
-        const clientRectRatio = figureSize.width / figureSize.height;
+    protected getFigureSize () {
+        const domSize: IFigureSize = this.el.getBoundingClientRect();
 
-        const minRatio: number = this.model.get('min_aspect_ratio');
-        const maxRatio: number = this.model.get('max_aspect_ratio');
+        let solver = new kiwi.Solver();
+        var width = new kiwi.Variable();
+        var height = new kiwi.Variable();
 
-        if (clientRectRatio < minRatio) {
-            // Too much vertical space: Keep horizontal space but compute height from min aspect ratio
-            figureSize.height = figureSize.width / minRatio;
-        }
-        else if (clientRectRatio > maxRatio) {
-            // Too much horizontal space: Keep vertical space but compute width from max aspect ratio
-            figureSize.width = figureSize.height * maxRatio;
-        }
+        var padding = {top: 0, bottom: 0, left: 0, right: 0};
+        ['top', 'bottom', 'left', 'right'].forEach((side) => {
+            padding[side] = this.decorators[side].reduce((total, decorator) => total + decorator.padding(), 0)
 
-        return figureSize;
+        })
+
+        solver.addEditVariable(width, kiwi.Strength.strong);
+        solver.addEditVariable(height, kiwi.Strength.strong);
+        solver.suggestValue(width, domSize.width);
+        solver.suggestValue(height, domSize.height);
+
+        /*
+         We want the figure size to always be inside the dom element:
+           width + padding.left + padding.right <= domSize.width
+           width + padding.left + padding.right - domSize.width < 0
+         If we don't add these constraints, the width and height might actually grow
+        */
+        solver.addConstraint(new kiwi.Constraint(new kiwi.Expression(width, padding.left, padding.right, -domSize.width), kiwi.Operator.Le));
+        // and similarly for the height
+        solver.addConstraint(new kiwi.Constraint(new kiwi.Expression(height, padding.top, padding.bottom, -domSize.height), kiwi.Operator.Le));
+
+        /*
+          The y coordinate is the top padding plus half of the leftover space, such that we distribute the
+          leftover space equally above and below:
+          y = padding.top + (leftover_vertical)/2
+          y = padding.top + (domSize.height - height - padding.bottom - padding.top)/2
+          y - padding.top - domSize.height/2 + height/2 + padding.bottom/2 + padding.top/2 = 0
+          y - padding.top/2 - domSize.height/2 + height/2 + padding.bottom/2 = 0
+        */
+        var x = new kiwi.Variable();
+        var y = new kiwi.Variable();
+        solver.addConstraint(new kiwi.Constraint(new kiwi.Expression(y, -padding.top/2,  -domSize.height/2, [0.5, height], padding.bottom/2), kiwi.Operator.Le));
+        // and analogous for x
+        solver.addConstraint(new kiwi.Constraint(new kiwi.Expression(x, -padding.left/2, -domSize.width/2, [0.5, width], padding.right/2), kiwi.Operator.Le));
+
+        /*
+         Definition of aspect ratio: aspect_ratio == width/height
+         min_aspect_ratio leads to the constrain:
+            width/height >= min_aspect_ratio
+            width >= min_aspect_ratio*height
+            width - min_aspect_ratio*height >= 0
+            -width + min_aspect_ratio*height <= 0
+         max_aspect_ratio leads to the constrain:
+            width/height <= max_aspect_ratio
+            width <= max_aspect_ratio*height
+            width - max_aspect_ratio*height <= 0
+            -width + max_aspect_ratio*height >= 0
+
+        Useful resources
+          https://github.com/IjzerenHein/kiwi.js/blob/master/docs/Kiwi.md
+          https://github.com/IjzerenHein/kiwi.js/blob/master/docs/Kiwi.md#module_kiwi..Expression
+        */
+        solver.addConstraint(new kiwi.Constraint(new kiwi.Expression([-1, width], [this.model.get('min_aspect_ratio'), height]), kiwi.Operator.Le));
+        solver.addConstraint(new kiwi.Constraint(new kiwi.Expression([-1, width], [this.model.get('max_aspect_ratio'), height]), kiwi.Operator.Ge));
+
+        // Solve the constraints
+        solver.updateVariables();
+        let bbox = {width: width.value(), height: height.value(), x: x.value(), y: y.value()};
+        return bbox;
     }
 
     render () {
@@ -200,11 +252,13 @@ class Figure extends widgets.DOMWidgetView {
         this.title = this.fig.append("text")
           .attr("class", "mainheading")
           .attr("x", 0.5 * (this.plotarea_width))
-          .attr("y", -(this.margin.top / 2.0))
-          .attr("dy", "1em")
+          .attr("y", 0)
+          .attr("dy", "0em")
           .styles(this.model.get("title_style"));
 
         this.title.text(this.model.get("title"));
+        this.decorators.top.push({padding: () => this.title ? (this.title.node().getBBox().height) : 0})
+
 
         // TODO: remove the save png event mechanism.
         this.model.on("save_png", this.save_png, this);
@@ -409,13 +463,22 @@ class Figure extends widgets.DOMWidgetView {
 
     add_axis(model) {
         // Called when an axis is added to the axes list.
-        const that = this;
         return this.create_child_view(model)
-          .then(function(view) {
-            that.fig_axes.node().appendChild(view.el);
-            that.displayed.then(function() {
+          .then((view) => {
+            this.fig_axes.node().appendChild(view.el);
+            this.displayed.then(function() {
                 view.trigger("displayed");
             });
+            if (view.model.get('orientation') == 'horizontal') {
+                this.decorators.bottom.push({padding: () => (<Axis><unknown>view).calculateLabelHeight()});
+            }
+            if (view.model.get('orientation') == 'vertical') {
+                this.decorators.left.push({padding: () => (<Axis><unknown>view).calculateLabelWidth()});
+            }
+            view.listenTo(model, 'change:label change:tick_rotate', () => {
+                this.debouncedRelayout()
+            })
+            this.debouncedRelayout();
             return view;
         });
     }
@@ -596,14 +659,12 @@ class Figure extends widgets.DOMWidgetView {
             }
 
             // transform figure
-            this.fig.attr("transform", "translate(" + this.margin.left + "," +
-                                                      this.margin.top + ")");
-            this.fig_background.attr("transform", "translate(" + this.margin.left + "," +
-                                                      this.margin.top + ")");
+            this.fig.attr("transform", "translate(" + figureSize.x + "," +
+                                                      figureSize.y + ")");
+            this.fig_background.attr("transform", "translate(" + figureSize.x + "," +
+                                                      figureSize.y + ")");
             this.title.attrs({
                 x: (0.5 * (this.plotarea_width)),
-                y: -(this.margin.top / 2.0),
-                dy: "1em"
             });
 
             this.bg
@@ -757,6 +818,7 @@ class Figure extends widgets.DOMWidgetView {
 
     update_title(model, title) {
         this.title.text(this.model.get("title"));
+        this.relayout();
     }
 
     remove() {
@@ -1010,6 +1072,7 @@ class Figure extends widgets.DOMWidgetView {
     x_padding_arr: any;
     y_pad_dict: any;
     y_padding_arr: any;
+    decorators = {top: [], bottom: [], left: [], right: []};
 
     private _update_requested: boolean;
     private relayoutRequested: boolean = false;

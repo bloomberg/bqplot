@@ -43,7 +43,7 @@ export class Axis extends WidgetView {
         const scale_promise = this.set_scale_promise(this.model.get("scale"));
         const offset_promise = this.get_offset_promise();
 
-        Promise.all([scale_promise, offset_promise]).then(() => {
+        return Promise.all([scale_promise, offset_promise]).then(() => {
             this.create_listeners();
             this.tick_format = this.generate_tick_formatter();
             this.set_scales_range();
@@ -902,6 +902,16 @@ export class Axis extends WidgetView {
 
     get margin() {
         return this.parent.margin;
+    }
+
+    calculateLabelHeight() {
+        // note that we use getBoundingClientRect to take into account transformations (such as rotations)
+        const labelHeights = this.d3el.selectAll('.tick text').nodes().map((el) => el.getBoundingClientRect().height);
+        return d3.max(labelHeights) + this.g_axisline.select("text.axislabel").node().getBoundingClientRect().height;
+    }
+    calculateLabelWidth() {
+        const labelWidths = this.d3el.selectAll('.tick text').nodes().map((el) => el.getBoundingClientRect().width);
+        return d3.max(labelWidths) + this.g_axisline.select("text.axislabel").node().getBoundingClientRect().width;
     }
 
     axis_scale: any;
