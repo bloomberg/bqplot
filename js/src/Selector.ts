@@ -19,6 +19,11 @@ import { Interaction } from './Interaction';
 const convert_dates = require('./utils').convert_dates;
 import { WidgetView } from '@jupyter-widgets/base';
 
+import {
+    LinearScale,
+    OrdinalScale
+} from 'bqscales'
+
 export abstract class BaseSelector extends Interaction {
 
     initialize(parameters) {
@@ -95,7 +100,8 @@ export abstract class BaseXSelector extends BaseSelector {
         }
         if(this.model.get("scale")) {
             const that = this;
-            return this.create_child_view(this.model.get("scale")).then(function(view) {
+            // @ts-ignore
+            return this.create_child_view(this.model.get("scale")).then(function(view: LinearScale | OrdinalScale) {
                 that.scale = view;
                 // The argument is to suppress the update to gui
                 that.update_scale_domain(true);
@@ -112,17 +118,17 @@ export abstract class BaseXSelector extends BaseSelector {
         const xy = (this.model.get("orientation") == "vertical") ? "y" : "x"
         const initial_range = this.parent.padded_range(xy, this.scale.model);
         const target_range = this.parent.range(xy);
-        this.scale.expand_domain(initial_range, target_range);
+        this.scale.expandDomain(initial_range, target_range);
     }
 
     set_range(array) {
         const xy = (this.model.get("orientation") == "vertical") ? "y" : "x"
         for(let iter = 0; iter < array.length; iter++) {
-            array[iter].set_range(this.parent.range(xy));
+            array[iter].setRange(this.parent.range(xy));
         }
     }
 
-    scale: any;
+    scale: LinearScale | OrdinalScale;
 }
 
 export abstract class BaseXYSelector extends BaseSelector {
@@ -137,7 +143,8 @@ export abstract class BaseXYSelector extends BaseSelector {
         }
         const scale_promises = [];
         if(this.model.get("x_scale")) {
-            scale_promises.push(this.create_child_view(this.model.get("x_scale")).then(function(view) {
+            //  @ts-ignore
+            scale_promises.push(this.create_child_view(this.model.get("x_scale")).then(function(view: LinearScale | OrdinalScale) {
                 that.x_scale = view;
                 that.update_xscale_domain();
                 that.set_x_range([that.x_scale]);
@@ -146,7 +153,8 @@ export abstract class BaseXYSelector extends BaseSelector {
             }));
         }
         if(this.model.get("y_scale")) {
-            scale_promises.push(this.create_child_view(this.model.get("y_scale")).then(function(view) {
+            //  @ts-ignore
+            scale_promises.push(this.create_child_view(this.model.get("y_scale")).then(function(view: LinearScale | OrdinalScale) {
                 that.y_scale = view;
                 that.update_yscale_domain();
                 that.set_y_range([that.y_scale]);
@@ -160,13 +168,13 @@ export abstract class BaseXYSelector extends BaseSelector {
 
     set_x_range(array) {
         for(let iter = 0; iter < array.length; iter++) {
-            array[iter].set_range(this.parent.range("x"));
+            array[iter].setRange(this.parent.range("x"));
         }
     }
 
     set_y_range(array) {
         for(var iter = 0; iter < array.length; iter++) {
-            array[iter].set_range(this.parent.range("y"));
+            array[iter].setRange(this.parent.range("y"));
         }
     }
 
@@ -175,7 +183,7 @@ export abstract class BaseXYSelector extends BaseSelector {
         // for the selector must be expanded to account for the padding.
         const initial_range = this.parent.padded_range("x", this.x_scale.model);
         const target_range = this.parent.range("x");
-        this.x_scale.expand_domain(initial_range, target_range);
+        this.x_scale.expandDomain(initial_range, target_range);
     }
 
     update_yscale_domain() {
@@ -183,9 +191,9 @@ export abstract class BaseXYSelector extends BaseSelector {
         // for the selector must be expanded to account for the padding.
         const initial_range = this.parent.padded_range("y", this.y_scale.model);
         const target_range = this.parent.range("y");
-        this.y_scale.expand_domain(initial_range, target_range);
+        this.y_scale.expandDomain(initial_range, target_range);
     }
 
-    x_scale: any
-    y_scale: any;
+    x_scale: LinearScale | OrdinalScale;
+    y_scale: LinearScale | OrdinalScale;
 }

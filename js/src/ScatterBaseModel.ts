@@ -118,16 +118,16 @@ export class ScatterBaseModel extends MarkModel {
         // color scale needs an issue in DateScaleModel to be fixed. It
         // should be moved here as soon as that is fixed.
 
-       const scales = this.get("scales");
+       const scales = this.getScales();
        for (let key in scales) {
             if(scales.hasOwnProperty(key)) {
                 const scale = scales[key];
                 if(!this.get("preserve_domain")[key]) {
-                    scale.compute_and_set_domain(this.mark_data.map(function(elem) {
+                    scale.computeAndSetDomain(this.mark_data.map(function(elem) {
                         return elem[key];
                     }), this.model_id + key);
                 } else {
-                    scale.del_domain([], this.model_id + key);
+                    scale.delDomain([], this.model_id + key);
                 }
             }
        }

@@ -14,6 +14,11 @@
  */
 
 import * as widgets from '@jupyter-widgets/base';
+
+import {
+    ColorScale, GeoScale, LinearScale, OrdinalScale
+} from 'bqscales';
+
 import * as d3 from 'd3';
 
 import {
@@ -36,6 +41,24 @@ function is_defined(value){
 };
 
 
+interface MarkScales {
+    x: LinearScale | OrdinalScale,
+    y: LinearScale | OrdinalScale,
+    width: LinearScale | OrdinalScale,
+    color: ColorScale,
+    link_color: ColorScale,
+    row: LinearScale | OrdinalScale,
+    column: LinearScale | OrdinalScale,
+    size: LinearScale | OrdinalScale,
+    opacity: LinearScale | OrdinalScale,
+    rotation: LinearScale | OrdinalScale,
+    skew: LinearScale | OrdinalScale,
+    sample: LinearScale | OrdinalScale,
+    count: LinearScale | OrdinalScale,
+    projection: GeoScale,
+}
+
+
 export abstract class Mark extends widgets.WidgetView {
 
     initialize () {
@@ -46,7 +69,7 @@ export abstract class Mark extends widgets.WidgetView {
         super.initialize.apply(this, arguments);
     }
 
-    render() {
+    render(): PromiseLike<any> {
         this.x_padding = 0;
         this.y_padding = 0;
         this.parent = this.options.parent;
@@ -105,13 +128,14 @@ export abstract class Mark extends widgets.WidgetView {
             this.stopListening(this.scales[key]);
         }
 
-        const scale_models = this.model.get("scales");
+        const scale_models = this.model.getScales();
         const that = this;
         const scale_promises = {};
         _.each(scale_models, function(model : widgets.WidgetModel, key) {
             scale_promises[key] = that.create_child_view(model);
         });
-        return widgets.resolvePromisesDict(scale_promises).then(function(scales) {
+        // @ts-ignore
+        return widgets.resolvePromisesDict(scale_promises).then(function(scales: MarkScales) {
             that.scales = scales;
             that.set_positional_scales();
             that.initialize_additional_scales();
@@ -169,13 +193,13 @@ export abstract class Mark extends widgets.WidgetView {
     }
 
     highlight_axes() {
-        _.each(this.model.get("scales"), function(model: any) {
+        _.each(this.model.getScales(), function(model: any) {
             model.trigger("highlight_axis");
         });
     }
 
     unhighlight_axes() {
-        _.each(this.model.get("scales"), function(model: any) {
+        _.each(this.model.getScales(), function(model: any) {
             model.trigger("unhighlight_axis");
         });
     }
@@ -517,7 +541,7 @@ export abstract class Mark extends widgets.WidgetView {
     event_listeners: any;
     event_metadata: any;
     parent: any;
-    scales: any;
+    scales: MarkScales;
     selected_indices: any;
     selected_style: any;
     tooltip_div: any;

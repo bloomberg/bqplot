@@ -66,12 +66,12 @@ export class GridHeatMap extends Mark {
             // The y_range is reversed because we want the first row
             // to start at the top of the plotarea and not the bottom.
             const row_range = this.parent.padded_range("y", row_scale.model);
-            row_scale.set_range(row_range);
-            // row_scale.set_range([row_range[1], row_range[0]]);
+            row_scale.setRange(row_range);
+            // row_scale.setRange([row_range[1], row_range[0]]);
         }
         const col_scale = this.scales.column;
         if(col_scale) {
-            col_scale.set_range(this.parent.padded_range("x", col_scale.model));
+            col_scale.setRange(this.parent.padded_range("x", col_scale.model));
         }
     }
 
@@ -414,7 +414,7 @@ export class GridHeatMap extends Mark {
             new_domain = this.expand_scale_domain(row_scale, this.model.rows, this.model.modes.row, (row_start_aligned));
             if(d3.min(new_domain) < d3.min(row_scale.model.domain) || d3.max(new_domain) > d3.max(row_scale.model.domain)) {
                 // Update domain if domain has changed
-                row_scale.model.compute_and_set_domain(new_domain, row_scale.model.model_id);
+                row_scale.model.computeAndSetDomain(new_domain, row_scale.model.model_id);
             }
         }
 
@@ -422,7 +422,7 @@ export class GridHeatMap extends Mark {
             new_domain = this.expand_scale_domain(column_scale, this.model.columns, this.model.modes.column, col_start_aligned);
             if(d3.min(new_domain) < d3.min(column_scale.model.domain) || d3.max(new_domain) > d3.max(column_scale.model.domain)) {
                 // Update domain if domain has changed
-                column_scale.model.compute_and_set_domain(new_domain, column_scale.model.model_id);
+                column_scale.model.computeAndSetDomain(new_domain, column_scale.model.model_id);
             }
         }
 

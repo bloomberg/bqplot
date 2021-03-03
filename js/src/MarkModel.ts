@@ -14,6 +14,14 @@
  */
 
 import * as widgets from '@jupyter-widgets/base';
+import {
+    Dict
+} from '@jupyter-widgets/base';
+
+import {
+    ScaleModel
+} from 'bqscales';
+
 import { semver_range } from './version';
 import * as serialize from './serialize';
 
@@ -81,14 +89,14 @@ export class MarkModel extends widgets.WidgetModel {
         // disassociates the mark with the scale
         this.dirty = true;
         for (let key in scales) {
-            scales[key].del_domain([], this.model_id + "_" + key);
+            scales[key].delDomain([], this.model_id + "_" + key);
         }
         this.dirty = false;
         //TODO: Check if the views are being removed
     }
 
     handle_destroy() {
-        this.unregister_all_scales(this.get("scales"));
+        this.unregister_all_scales(this.getScales());
     }
 
     get_key_for_dimension(dimension) {
@@ -116,6 +124,10 @@ export class MarkModel extends widgets.WidgetModel {
         return data;
     }
 
+    getScales() : Dict<ScaleModel> {
+        return this.get('scales');
+    }
+
     static serializers = {
         ...widgets.WidgetModel.serializers,
         scales: { deserialize: widgets.unpack_models },
@@ -127,4 +139,3 @@ export class MarkModel extends widgets.WidgetModel {
     mark_data: any;
 
 }
-

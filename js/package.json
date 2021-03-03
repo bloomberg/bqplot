@@ -71,6 +71,7 @@
     "@jupyter-widgets/base": "^2 || ^3 || ^4.0.0",
     "@lumino/messaging": "^1",
     "@lumino/widgets": "^1",
+    "bqscales": "^0.1.1",
     "d3": "^5.7.0",
     "d3-selection": "^1",
     "is-typedarray": "^1.0.0",
@@ -85,6 +86,10 @@
     "outputDir": "../share/jupyter/labextensions/bqplot",
     "sharedPackages": {
       "@jupyter-widgets/base": {
+        "bundled": false,
+        "singleton": true
+      },
+      "bqscales": {
         "bundled": false,
         "singleton": true
       }

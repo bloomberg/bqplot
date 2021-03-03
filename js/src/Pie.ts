@@ -71,12 +71,12 @@ export class Pie extends Mark {
     set_ranges() {
         const x_scale = this.scales.x;
         if(x_scale) {
-            x_scale.set_range(this.parent.padded_range("x", x_scale.model));
+            x_scale.setRange(this.parent.padded_range("x", x_scale.model));
             this.x_offset = x_scale.offset;
         }
         const y_scale = this.scales.y;
         if(y_scale) {
-            y_scale.set_range(this.parent.padded_range("y", y_scale.model));
+            y_scale.setRange(this.parent.padded_range("y", y_scale.model));
             this.y_offset = y_scale.offset;
         }
     }
@@ -529,7 +529,7 @@ export class Pie extends Mark {
     }
 
     compute_view_padding() {
-        const scales = this.model.get("scales");
+        const scales = this.model.getScales();
         const r = d3.max([this.model.get("radius"), this.model.get("inner_radius")]);
 
         const x_padding = (scales.x) ? (r+1) : 0;

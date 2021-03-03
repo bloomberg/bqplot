@@ -14,6 +14,11 @@
  */
 
 import * as widgets from '@jupyter-widgets/base';
+
+import {
+    Scale
+} from 'bqscales';
+
 import * as d3 from 'd3';
 // var d3 =Object.assign({}, require("d3-selection"), require("d3-selection-multi"));
 import * as _ from 'underscore';
@@ -340,17 +345,19 @@ class Figure extends widgets.DOMWidgetView {
         // See the scale_x and scale_y attributes of the python Figure
         const that = this;
         const x_scale_promise = this.create_child_view(this.model.get("scale_x"))
-            .then(function(view) {
+        // @ts-ignore
+            .then(function(view: Scale) {
                 that.scale_x = view;
                 that.scale_x.scale.clamp(true);
-                that.scale_x.set_range([0, that.plotarea_width]);
+                that.scale_x.setRange([0, that.plotarea_width]);
             });
 
         const y_scale_promise = this.create_child_view(this.model.get("scale_y"))
-            .then(function(view) {
+        // @ts-ignore
+            .then(function(view: Scale) {
                 that.scale_y = view;
                 that.scale_y.scale.clamp(true);
-                that.scale_y.set_range([that.plotarea_height, 0]);
+                that.scale_y.setRange([that.plotarea_height, 0]);
             });
         return Promise.all([x_scale_promise, y_scale_promise]);
     }
@@ -596,12 +603,12 @@ class Figure extends widgets.DOMWidgetView {
             }
 
             if (this.scale_x !== undefined && this.scale_x !== null) {
-                this.scale_x.set_range([0, this.plotarea_width]);
+                this.scale_x.setRange([0, this.plotarea_width]);
             }
 
 
             if (this.scale_y !== undefined && this.scale_y !== null) {
-                this.scale_y.set_range([this.plotarea_height, 0]);
+                this.scale_y.setRange([this.plotarea_width, 0]);
             }
 
             // transform figure
@@ -1033,8 +1040,8 @@ class Figure extends widgets.DOMWidgetView {
     popper_reference: any;
     popper: any;
     renderer: THREE.WebGLRenderer | null;
-    scale_x: any;
-    scale_y: any;
+    scale_x: Scale;
+    scale_y: Scale;
     svg: d3.Selection<SVGElement, any, any, any>;
     svg_background: d3.Selection<SVGElement, any, any, any>;
     title: any;

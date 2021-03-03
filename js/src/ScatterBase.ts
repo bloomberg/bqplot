@@ -17,6 +17,11 @@ import * as d3 from 'd3';
 // const d3 =Object.assign({}, require("d3-array"), require("d3-drag"), require("d3-selection"), require("d3-selection-multi"));
 const d3GetEvent = function(){return require("d3-selection").event}.bind(this);
 import { Mark } from './Mark';
+
+import {
+    Scale
+} from 'bqscales';
+
 import * as _ from 'underscore';
 import { applyStyles } from './utils';
 
@@ -86,22 +91,22 @@ export abstract class ScatterBase extends Mark {
             skew_scale = this.scales.skew,
             rotation_scale = this.scales.rotation;
         if(x_scale) {
-            x_scale.set_range(this.parent.padded_range("x", x_scale.model));
+            x_scale.setRange(this.parent.padded_range("x", x_scale.model));
         }
         if(y_scale) {
-            y_scale.set_range(this.parent.padded_range("y", y_scale.model));
+            y_scale.setRange(this.parent.padded_range("y", y_scale.model));
         }
         if(size_scale) {
-            size_scale.set_range([0, this.model.get("default_size")]);
+            size_scale.setRange([0, this.model.get("default_size")]);
         }
         if(opacity_scale) {
-            opacity_scale.set_range([0.2, 1]);
+            opacity_scale.setRange([0.2, 1]);
         }
         if(skew_scale) {
-            skew_scale.set_range([0, 1]);
+            skew_scale.setRange([0, 1]);
         }
         if(rotation_scale) {
-            rotation_scale.set_range([0, 180]);
+            rotation_scale.setRange([0, 180]);
         }
     }
 
@@ -594,7 +599,8 @@ export abstract class ScatterBase extends Mark {
     }
 
     on_drag(d, i, dragged_node) {
-        const x_scale = this.scales.x, y_scale = this.scales.y;
+        const x_scale = this.scales.x;
+        const y_scale = this.scales.y;
         // If restrict_x is true, then the move is restricted only to the X
         // direction.
         const restrict_x = this.model.get("restrict_x"),
@@ -623,7 +629,8 @@ export abstract class ScatterBase extends Mark {
     }
 
     drag_ended(d, i, dragged_node) {
-        const x_scale = this.scales.x, y_scale = this.scales.y;
+        const x_scale = this.scales.x;
+        const y_scale = this.scales.y;
 
         this.reset_drag_style(d, i, dragged_node);
         this.update_array(d, i);
@@ -694,6 +701,6 @@ export abstract class ScatterBase extends Mark {
     legend_el: any;
     x_pixels: any;
     y_pixels: any;
-    x_scale: any;
-    y_scale: any;
+    x_scale: Scale;
+    y_scale: Scale;
 };

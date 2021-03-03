@@ -20,6 +20,10 @@ import { BaseXSelector } from './Selector';
 import * as sel_utils from './selector_utils';
 import { applyAttrs } from './utils';
 
+import {
+    LinearScale, OrdinalScale
+} from 'bqscales';
+
 export class FastIntervalSelector extends BaseXSelector {
 
     render() {
@@ -113,7 +117,7 @@ export class FastIntervalSelector extends BaseXSelector {
         this.rect.attr("width", interval_size);
         const pixel_extent = [start, start + interval_size];
         this.set_selected("selected",
-                                   this.scale.invert_range(pixel_extent));
+                                   this.scale.invertRange(pixel_extent));
         this.update_mark_selected(pixel_extent, undefined);
         this.touch();
         this.dirty = false;
@@ -224,4 +228,5 @@ export class FastIntervalSelector extends BaseXSelector {
     size: any;
     background: any;
     rect: any;
+    scale: LinearScale | OrdinalScale;
 }

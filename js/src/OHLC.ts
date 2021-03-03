@@ -48,11 +48,11 @@ export class OHLC extends Mark {
     set_ranges() {
         const x_scale = this.scales.x;
         if(x_scale) {
-            x_scale.set_range(this.parent.padded_range("x", x_scale.model));
+            x_scale.setRange(this.parent.padded_range("x", x_scale.model));
         }
         const y_scale = this.scales.y;
         if(y_scale) {
-            y_scale.set_range(this.parent.padded_range("y", y_scale.model));
+            y_scale.setRange(this.parent.padded_range("y", y_scale.model));
         }
     }
 
@@ -602,7 +602,7 @@ export class OHLC extends Mark {
          */
         const that = this;
         let min_distance: any = Number.POSITIVE_INFINITY;
-        const scales = this.model.get("scales");
+        const scales = this.model.getScales();
         const x_scale = scales.x;
 
         for(var i = 1; i < that.model.mark_data.length; i++) {

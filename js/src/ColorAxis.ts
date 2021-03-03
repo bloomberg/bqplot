@@ -18,6 +18,10 @@ import * as d3 from 'd3';
 import { Axis } from './Axis';
 import { applyAttrs } from './utils';
 
+import {
+  ColorScaleModel, ColorScale
+} from 'bqscales';
+
 class ColorBar extends Axis {
 
     render() {
@@ -88,11 +92,12 @@ class ColorBar extends Axis {
         this.redraw_axisline();
     }
 
-    set_scale(model) {
+    set_scale(model: ColorScaleModel) {
         // Sets the child scale
         const that = this;
         if (this.axis_scale) { this.axis_scale.remove(); }
-        return this.create_child_view(model).then(function(view) {
+        // @ts-ignore
+        return this.create_child_view(model).then(function(view: ColorScale) {
             // Trigger the displayed event of the child view.
             that.displayed.then(function() {
                 view.trigger("displayed");
@@ -270,7 +275,7 @@ class ColorBar extends Axis {
 
     set_scales_range() {
         //Setting the range of the color scale
-        this.axis_scale.set_range();
+        this.axis_scale.setRange();
         this.set_axisline_scale_range();
     }
 
@@ -363,6 +368,7 @@ class ColorBar extends Axis {
         this.redraw_axisline();
     }
 
+    axis_scale: ColorScale;
     axis_line_scale: any;
     ordinal: boolean;
     bar_height: number;
