@@ -21,10 +21,10 @@
   "scripts": {
     "build": "jlpm run build:css && jlpm run build:js && jlpm run build:labextension && webpack --mode=production",
     "build:css": "lessc less/bqplot.less css/bqplot.css",
-    "build:js": "tsc",
+    "build:js": "tsc --build src",
     "build:labextension": "jupyter labextension build .",
     "watch": "npm-run-all -p watch:*",
-    "watch:js": "tsc --watch",
+    "watch:js": "tsc --build src --watch",
     "watch:nbextension": "webpack --watch --mode=development",
     "watch:labextension": "jupyter labextension watch .",
     "prepare": "jlpm run build",
